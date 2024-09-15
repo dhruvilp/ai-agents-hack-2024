@@ -1,11 +1,11 @@
-# lablab-watsonx-challenge-2024
+# lablab-ai-agents-challenge-2024
 
 DEMO: https://youtu.be/RvJ0WMWJE0g
 
 Financial institutions in the financial services sector face challenges in complying with evolving AI regulations that mandate transparency, accountability, and data privacy. They are required to implement robust governance frameworks to document AI decision-making processes, conduct regular audits, and ensure the ethical use of AI in high-stakes areas like AML and BSA compliance. Institutions must also adapt to changing regulatory requirements, provide clear explanations of AI model decisions, safeguard against biases, and maintain data privacy. https://thefinancialbrand.com/news/banking-trends-strategies/genai-bankings-best-offense-in-challenging-times-174940/ The proposed solution addresses the compliance challenges by automating key aspects of regulatory monitoring. By using Whisper to transcribe relevant communications, Granite LLM Model to analyze data, and MoA to delegate and automate tasks, the solution ensures efficient tracking of regulatory changes and internal policies. Langchain manages the workflow to maintain timely compliance, while Crew AI coordinates between agents and human officers, enhancing overall adherence to regulations and streamlining the compliance process.
 
 ## Proposed Solution
-![image](https://raw.githubusercontent.com/dhruvilp/lablab-watsonx-challenge-2024/main/watsonx-streamlit-demo.png)
+![image](https://raw.githubusercontent.com/dhruvilp/lablab-ai-agents-challenge-2024/main/ai-agents-streamlit-demo.png)
 
 The proposed solution addresses the compliance challenges by automating key aspects of regulatory monitoring. 
 By using Granite LLM Model to analyze data, and MoA to delegate and automate tasks, the solution ensures efficient tracking of regulatory changes and internal policies. 
@@ -13,9 +13,10 @@ Langchain manages the workflow to maintain timely compliance, while Crew AI coor
 
 ## Tech Stack
 * Crew AI
-* IBM WatsonX AI
-* IBM Granite 13B V2 Chat LLM
-* Meta Llama 2 Chat LLM
+* Together AI
+* Llama 3.1 70B Instruct Turbo LLM
+* Composio Tools (Gmail, Web Search etc)
+* AgentOps Multi-agent Monitoring and Logs
 
 ## Sample Prompts
 
@@ -54,11 +55,7 @@ Expected Tasks Triggered: Policy Review and Update, Regulatory Communication and
 ```
 ### Set up the environment
 
--  Create a <a href="https://cloud.ibm.com/catalog/services/watson-machine-learning" target="_blank" rel="noopener no referrer">Watson Machine Learning (WML) Service</a> instance (a free plan is offered and information about how to create the instance can be found <a href="https://dataplatform.cloud.ibm.com/docs/content/wsj/admin/create-services.html?context=wx&audience=wdp" target="_blank" rel="noopener no referrer">here</a>).
-
-### Defining the WML credentials
-This cell defines the WML credentials required to work with watsonx Foundation Model inferencing.
-**Action:** Provide the IBM Cloud user API key. For details, see <a href="https://cloud.ibm.com/iam/apikeys" target="_blank" rel="noopener no referrer">documentation</a>.
+Get required API keys mentioned in example.env file.
 
 ### How-to Run
 

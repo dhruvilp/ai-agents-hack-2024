@@ -2,11 +2,10 @@ python-dotenv
 streamlit
 fastapi
 wget
-ibm-watsonx-ai
 numpy
-crewai-tools
+crewai[tools]
 crewai
-langchain-ibm
-ibm-watsonx-ai
-# langchain_core
-# typing
+langchain-together
+# composio-langchain
+composio-crewai
+agentops

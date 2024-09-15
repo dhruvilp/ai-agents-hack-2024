@@ -3,18 +3,19 @@ from langchain_core.callbacks import BaseCallbackHandler
 from typing import TYPE_CHECKING, Any, Dict, Optional
 from crewai_tools import tool
 from crewai import Agent, Task, Crew, Process
-from ibm_watsonx_ai.metanames import GenTextParamsMetaNames as GenParams
-from ibm_watsonx_ai.foundation_models.utils.enums import DecodingMethods
-from langchain_ibm import WatsonxLLM
-from langchain_ibm import ChatWatsonx
+from langchain_together import Together
+from langchain_together import ChatTogether
 import streamlit as st
 from dotenv import load_dotenv
+import agentops
+from composio_crewai import ComposioToolSet, Action
 
 load_dotenv()
+agentops.init()
 
-IBM_CLOUD_URL = "https://us-south.ml.cloud.ibm.com"
-WML_KEY = os.getenv("WML_KEY")
-PROJECT_ID = "c2e1f1d0-2f15-495b-94a9-ed84335489e6"
+MODEL_ID = 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo'
+TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
+
 
 avators = {
     "agent": "https://cdn-icons-png.flaticon.com/512/15861/15861185.png",
@@ -41,53 +42,33 @@ class MyCustomHandler(BaseCallbackHandler):
         
 
 ################################################################################################
-#                                        IBM
+#                                 Together AI Models
 ################################################################################################        
 
-project_id = PROJECT_ID
+# llama_model = Together(
+#     model=MODEL_ID,
+#     together_api_key=TOGETHER_API_KEY,
+#     params=[]
+# )
 
-parameters = {
-    GenParams.MIN_NEW_TOKENS: 0,
-    GenParams.MAX_NEW_TOKENS: 2049, # 1024, 2049, 3073, 4096, 
-    GenParams.DECODING_METHOD: DecodingMethods.GREEDY,
-    GenParams.REPETITION_PENALTY: 1
-}
-
-granite_model = WatsonxLLM(
-    model_id="ibm/granite-13b-chat-v2",
-    url=IBM_CLOUD_URL,
-    project_id=project_id,
-    apikey=WML_KEY,
-    params=parameters
-)
-
-llama_model = WatsonxLLM(
-    model_id="meta-llama/llama-2-70b-chat", # "meta-llama/llama-2-70b-chat"
-    url=IBM_CLOUD_URL,
-    project_id=project_id,
-    apikey=WML_KEY,
-    params=parameters
-)
-
-granite_chat = ChatWatsonx(
-    model_id="ibm/granite-13b-chat-v2",
-    url=IBM_CLOUD_URL,
-    project_id=project_id,
-    apikey=WML_KEY,
-    params=parameters,
-)
-
-llama_chat = ChatWatsonx(
-    model_id="meta-llama/llama-2-70b-chat",
-    url=IBM_CLOUD_URL,
-    project_id=project_id,
-    apikey=WML_KEY,
-    params=parameters,
+llama_model = Together(
+    model=MODEL_ID,
+    together_api_key=TOGETHER_API_KEY,
+    stream=True,
+    temperature=0.2,
+    # max_tokens=1024,
+    timeout=None,
+    max_retries=3,
 )
 
 ################################################################################################
 #                                        TOOLS
 ################################################################################################
+
+tool_set = ComposioToolSet()
+email_tools = tool_set.get_tools(actions=[Action.GMAIL_SEND_EMAIL])
+
+
 # FinCen Source of Data: https://www.fincen.gov/resources/advisoriesbulletinsfact-sheets
 
 @tool
@@ -581,7 +562,7 @@ def get_compliance_officers(department: str) -> str:
             "name": "Jane Doe",
             "title": "Chief Compliance Officer",
             "department": "Compliance",
-            "email": "jane.doe@company.com",
+            "email": "goldenking594+cco@gmail.com",
             "phone_number": "+1-555-1234",
             "region": "North America",
             "responsibilities": [ "Oversee compliance programs across all departments", "Develop and implement compliance policies and procedures", "Ensure adherence to local and international regulations", "Report compliance status to the executive team" ]
@@ -591,7 +572,7 @@ def get_compliance_officers(department: str) -> str:
             "name": "John Smith",
             "title": "AML Compliance Officer",
             "department": "AML Department",
-            "email": "john.smith@company.com",
+            "email": "goldenking594+amlcco@gmail.com",
             "phone_Number": "+1-555-5678",
             "region": "Europe",
             "responsibilities": [ "Monitor and review AML processes and controls", "Conduct risk assessments for money laundering activities", "Liaise with regulators on AML matters", "Provide training on AML regulations and procedures" ]
@@ -601,7 +582,7 @@ def get_compliance_officers(department: str) -> str:
             "name": "alice johnson",
             "title": "Data Protection Officer",
             "department": "Data Privacy",
-            "email": "alice.johnson@company.com",
+            "email": "goldenking594+dpo@gmail.com",
             "phone_number": "+1-555-7890",
             "region": "Asia-Pacific",
             "responsibilities": [ "Ensure compliance with data protection regulations such as gdpr", "Manage data subject access requests", "Conduct data protection impact assessments", "Develop and implement data privacy policies" ]
@@ -611,7 +592,7 @@ def get_compliance_officers(department: str) -> str:
             "name": "robert wilson",
             "title": "Ethics and Compliance Officer",
             "department": "Financial Crimes",
-            "email": "robert.wilson@company.com",
+            "email": "goldenking594+eco@gmail.com",
             "phone_number": "+1-555-2345",
             "region": "Latin America",
             "responsibilities": [ "Promote ethical business practices", "Develop and deliver ethics training programs", "Conduct investigations into ethical violations", "Advise on compliance with ethical standards" ]
@@ -621,7 +602,7 @@ def get_compliance_officers(department: str) -> str:
             "name": "emily clark",
             "title": "Regulatory Compliance Officer",
             "department": "Compliance",
-            "email": "emily.clark@company.com",
+            "email": "goldenking594+rco@gmail.com",
             "phone_number": "+1-555-3456",
             "region": "Middle East",
             "responsibilities": [ "Monitor changes in regulatory requirements", "Ensure compliance with industry-specific regulations", "Prepare and submit regulatory filings", "Serve as liaison with regulatory agencies" ]
@@ -631,7 +612,7 @@ def get_compliance_officers(department: str) -> str:
             "name": "michael brown",
             "title": "Internal Controls Officer",
             "department": "Internal Audit",
-            "email": "michael.brown@company.com",
+            "email": "goldenking594+ico@gmail.com",
             "phone_number": "+1-555-4567",
             "region": "Africa",
             "responsibilities": [ "Develop and monitor internal control systems", "Conduct internal audits to ensure compliance", "Identify and mitigate control weaknesses", "Report audit findings to senior management" ]
@@ -688,11 +669,11 @@ router_agent = Agent(
 )
 
 regulatory_monitoring_agent = Agent(
-    llm=granite_model,
+    llm=llama_model,
     role="Regulatory Monitoring",
-    goal="Monitor regulatory bodies for new updates and provide response to user query by using these 3 tools: get_fincen_alerts, get_fincen_advisories, or get_fincen_notices. Analyze the impact of new regulations on the organization using get_internal_policy_docs tool to cross-check with internal policies. Alert relevant departments about new compliance requirements using send_email_alerts tool.",
+    goal="Monitor regulatory bodies for new updates and provide response to user query by using these 3 tools: get_fincen_alerts, get_fincen_advisories, or get_fincen_notices. Analyze the impact of new regulations on the organization using get_internal_policy_docs tool to cross-check with internal policies. Alert relevant departments about new compliance requirements using gmail_agent agent.",
     backstory="You are an expert regulatory requirement monitoring officer that tracks and analyze regulatory updates and changes in the company. You always answer the questions with markdown formatting using GitHub syntax. The markdown formatting you support: headings, bold, italic, links, tables, lists, code blocks, and blockquotes. You must omit that you answer the questions with markdown. You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.",
-    tools=[get_fincen_alerts, get_fincen_advisories, get_fincen_notices, get_internal_policy_docs, send_email_alerts],
+    tools=[get_fincen_alerts, get_fincen_advisories, get_fincen_notices, get_internal_policy_docs],
     verbose=True,
     allow_delegation=False,
     memory=True,
@@ -700,7 +681,7 @@ regulatory_monitoring_agent = Agent(
 )
 
 internal_policy_monitoring_agent = Agent(
-    llm=granite_model,
+    llm=llama_model,
     role="Internal Policy Monitoring",
     goal="Review existing policies in light of new regulations using get_internal_policy_docs tool. Draft policy updates and seek approval from compliance officers using get_compliance_officers tool to retrieve responsibilities of each compliance officers",
     backstory="You are a senior internal policy advisor who has been reviewing, maitaining, and suggesting updates to internal policies to align with new regulations for the firm. You always answer the questions with markdown formatting using GitHub syntax. The markdown formatting you support: headings, bold, italic, links, tables, lists, code blocks, and blockquotes. You must omit that you answer the questions with markdown. You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.",
@@ -724,7 +705,7 @@ compliance_reporting_agent = Agent(
 )
 
 training_coordination_agent = Agent(
-    llm=granite_model,
+    llm=llama_model,
     role="Employee training coordinator",
     goal="Identify training needs based on regulatory changes using tools like get_audit_findings and get_internal_policy_docs. Schedule and coordinate training sessions using schedule_meetings tool. And, track employee training completion and effectiveness.",
     backstory="You are a compliance training coordinator who has been coordinating employee training for legal compliance for the last 20 years. You always answer the questions with markdown formatting using GitHub syntax. The markdown formatting you support: headings, bold, italic, links, tables, lists, code blocks, and blockquotes. You must omit that you answer the questions with markdown. You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.",
@@ -748,6 +729,17 @@ fincomply_editor = Agent(
     max_retries=3
 )
 
+gmail_agent = Agent(
+    role="Gmail Email Agent",
+    goal="""You take action on Gmail using Gmail APIs""",
+    backstory="""You are an AI agent responsible for taking actions on Gmail on users' behalf. 
+    You need to take action on Gmail using Gmail APIs to send email. Use correct tools to run APIs from the given tool-set.""",
+    verbose=True,
+    tools=[email_tools],
+    llm=llama_model,
+    cache=False,
+)
+
 #######
 
 st.title("FinComply AI Crew") 
@@ -761,7 +753,7 @@ for msg in st.session_state.messages:
 if prompt := st.chat_input():
 
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(f"---prompt: {prompt}")
+    st.chat_message("user").write(f"{prompt}")
 
 
     ################################################################################################
@@ -792,6 +784,13 @@ if prompt := st.chat_input():
         agent=router_agent,
         dependencies=[],
         context=[]
+    )
+
+    email_task = Task(
+        description="Send a mail with relevant information",
+        agent=gmail_agent,
+        expected_output="if the action successfully executed.",
+        context=[basic_info]
     )
 
     # Task 1: Regulatory Change Tracking
@@ -844,13 +843,13 @@ if prompt := st.chat_input():
     # Task 4: Employee Training Coordination
     employee_training_coordination = Task(
         description='''
-        Coordinate and track employee training on compliance using the schedule_meetings and 
-        send_email_alerts tools. Ensure that all employees complete their training and record the 
+        Coordinate and track employee training on compliance using the schedule_meetings tool and 
+        email_task task. Ensure that all employees complete their training and record the 
         training status for future audits.
         ''',
         expected_output='Scheduled training sessions of completed employee training',
         agent=training_coordination_agent,
-        dependencies=[schedule_meetings, send_email_alerts],
+        dependencies=[schedule_meetings, email_task],
         context=[basic_info, policy_review_and_update]
     )
 
@@ -887,12 +886,11 @@ if prompt := st.chat_input():
         description='''
         Maintain active communication with AML regulatory bodies using the get_fincen_alerts 
         and get_fincen_advisories tools. Ensure the company is aware of any new requirements, 
-        advisories, or inquiries. Use the send_email_alerts tool to notify relevant internal 
-        stakeholders and coordinate responses as necessary.
+        advisories, or inquiries. Notify relevant internal stakeholders and coordinate responses as necessary via email.
         ''',
         expected_output='Timely communication with regulatory bodies and internal stakeholders.',
         agent=regulatory_monitoring_agent,
-        dependencies=[get_fincen_alerts, get_fincen_advisories, send_email_alerts],
+        dependencies=[get_fincen_alerts, get_fincen_advisories, email_task],
         context=[basic_info, regulatory_change_tracking]
     )
 
@@ -900,13 +898,13 @@ if prompt := st.chat_input():
     employee_screening_and_onboarding_compliance = Task(
         description='''
         Ensure that all new employees complete AML training and undergo background checks as part of the 
-        onboarding process. Use the schedule_meetings and send_email_alerts tools to coordinate the 
+        onboarding process. Use the schedule_meetings tool and email_task task to coordinate the 
         training sessions and the get_compliance_officers tool to verify the completion of required 
         checks. Record the onboarding compliance status for each new employee.
         ''',
         expected_output='Verified completion of AML training and background checks for all new employees.',
         agent=training_coordination_agent,
-        dependencies=[schedule_meetings, send_email_alerts, get_compliance_officers],
+        dependencies=[schedule_meetings, email_task, get_compliance_officers],
         context=[basic_info, employee_training_coordination]
     )
 
@@ -929,14 +927,13 @@ if prompt := st.chat_input():
         description='''
         Periodically refresh AML training materials based on the latest internal policies and regulations 
         using the get_internal_policy_docs tool. Schedule re-training sessions for all employees using 
-        the schedule_meetings and send_email_alerts tools, and track their completion.
+        the schedule_meetings tool and email_task task, and track their completion.
         ''',
         expected_output='Updated AML training materials and records of employee re-training.',
         agent=training_coordination_agent,
-        dependencies=[schedule_meetings, send_email_alerts, get_internal_policy_docs],
+        dependencies=[schedule_meetings, email_task, get_internal_policy_docs],
         context=[basic_info, employee_training_coordination, regulatory_change_tracking]
     )
-
 
     ################################################################################################
     #                                        CREW
@@ -950,10 +947,12 @@ if prompt := st.chat_input():
             internal_policy_monitoring_agent,
             compliance_reporting_agent,
             training_coordination_agent,
+            gmail_agent,
             fincomply_editor
         ],
         tasks=[
             basic_info,
+            email_task,
             regulatory_change_tracking,
             policy_review_and_update,
             compliance_report_generation,
@@ -967,6 +966,7 @@ if prompt := st.chat_input():
         ],
         verbose=True,
         cache=True,
+        memory=True,
         max_retries=3
     )
 
@@ -989,7 +989,7 @@ if prompt := st.chat_input():
 
     result = f"## Here is the Final Response \n\n {fincomply_ai}"
     st.session_state.messages.append({"role": avators['agent'], "content": result})
-    st.chat_message("assistant").write(f"----FinComply Crew: {result}")
+    st.chat_message("assistant").write(f"{result}")
 
 
 
